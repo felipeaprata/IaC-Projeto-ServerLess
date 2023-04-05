@@ -1,0 +1,64 @@
+service: dio-projeto-serverless
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  iam: 
+    role:
+      statements:
+        - Effect: Allow
+          Action: 
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+            - dynamodb:scan
+          Resource:
+            - arn:aws:dynamodb:us-east-1:590380924747:table/ItemTableNew
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
+  inserItem:
+    handler: src/insertItem.handler
+    events:
+      - httpApi:
+          path: /item
+          method: post
+  fetchItems:
+    handler: src/fetchItems.handler
+    events:
+      - httpApi:
+          path: /items
+          method: get
+  updateItems:
+    handler: src/updateItems.handler
+    events:
+      - httpApi:
+          path: /items/{id}
+          method: put
+  fetchItem:
+    handler: src/fetchItem.handler
+    events:
+      - httpApi:
+          path: /items/{id}
+          method: get
+
+resources:
+  Resources:
+    ItemTableNew:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ItemTableNew
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH 
